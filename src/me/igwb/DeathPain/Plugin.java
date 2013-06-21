@@ -9,6 +9,8 @@ public class Plugin extends JavaPlugin{
 
 	private static final int CONFIG_VERSION = 0;
 	
+	private EventListener EL;
+	
 	private boolean debug;
 	private boolean statistics;
 	private List<String> worlds;
@@ -18,9 +20,12 @@ public class Plugin extends JavaPlugin{
 	
 		LoadConfig();
 		
+		EL = new EventListener(this);
+		
+		RegisterEvents();
 	}
 	
-	public void LoadConfig() {
+	private void LoadConfig() {
 
 		FileConfiguration config = this.getConfig();
 		config.options().copyDefaults();
@@ -35,13 +40,24 @@ public class Plugin extends JavaPlugin{
 		statistics = config.getBoolean("Statistics");
 		worlds = config.getStringList("Worlds");
 		
-		//Output Configuration if(debug)
-		if(debug)
+		//Print out the configuration if(debug)
+		if(debug) {
 			   LogMessage("Debug mode: " + debug);
 			   LogMessage("Statistics: " + statistics);
 			   LogMessage("Enabled in world(s): " + worlds);
 			   LogMessage("Config version: " + config.getInt("Version"));
-
+		}
+		
+	}
+	
+	private void RegisterEvents() {
+		
+		getServer().getPluginManager().registerEvents(EL,this);
+		
+	}
+	
+	public boolean getDebug() {
+		return debug;
 	}
 	
 	public void LogMessage(String message){
