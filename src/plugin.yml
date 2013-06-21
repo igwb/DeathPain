@@ -1,0 +1,9 @@
+name: DeathPain
+main: me.igwb.DeathPain.Plugin
+version: 1.0
+commands:
+   None:
+      description: DoesNothing
+      usage:  /Command [command]
+      permission: none.none
+      permission-message: You don't have permission!
