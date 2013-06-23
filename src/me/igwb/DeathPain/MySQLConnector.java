@@ -26,9 +26,45 @@ public class MySQLConnector {
 		
 		url = "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database;
 		
+		initialize();
+		
 		if(parent.getDebug()) {
 			printSQLVersion();
 		}
+	}
+	
+	private void initialize() {
+        Connection con = null;
+        Statement st = null;
+		
+        try {
+            con = DriverManager.getConnection(url, user, password);
+            st = con.createStatement();
+            
+            st.executeUpdate("USE " + database);
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS Players(Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(30), DeathCount INT, LastDeath DATETIME);");
+
+            
+            
+
+        } catch (SQLException ex) {
+        	parent.LogSevere(MySQLConnector.class.getName());
+        	parent.LogSevere(ex.getMessage());
+
+        } finally {
+            try {
+                if (st != null) {
+                    st.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+
+            } catch (SQLException ex) {
+            	parent.LogMessage(MySQLConnector.class.getName());
+            	parent.LogSevere(ex.getMessage());
+            }
+        }
 	}
 	
 	private void printSQLVersion() {
@@ -67,7 +103,6 @@ public class MySQLConnector {
             	parent.LogSevere(ex.getMessage());
             }
         }
-        
 	}
 	
 }

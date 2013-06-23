@@ -78,4 +78,5 @@ public class Plugin extends JavaPlugin{
 	public void LogSevere(String message){
 		getLogger().severe(message);
 	}
+
 }
