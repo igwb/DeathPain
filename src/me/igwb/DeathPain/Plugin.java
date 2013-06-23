@@ -10,6 +10,7 @@ public class Plugin extends JavaPlugin{
 	private static final int CONFIG_VERSION = 0;
 	
 	private EventListener EL;
+	private MySQLConnector SQLConnector;
 	
 	private boolean debug;
 	private boolean statistics;
@@ -18,14 +19,15 @@ public class Plugin extends JavaPlugin{
 	@Override
 	public void onEnable()  {
 	
-		LoadConfig();
+		loadConfig();
+		initializeMySQL();
 		
 		EL = new EventListener(this);
 		
 		RegisterEvents();
 	}
 	
-	private void LoadConfig() {
+	private void loadConfig() {
 
 		FileConfiguration config = this.getConfig();
 		config.options().copyDefaults();
@@ -47,6 +49,15 @@ public class Plugin extends JavaPlugin{
 			   LogMessage("Enabled in world(s): " + worlds);
 			   LogMessage("Config version: " + config.getInt("Version"));
 		}
+		
+	}
+	
+	private void initializeMySQL() {
+		FileConfiguration config = this.getConfig();
+		config.options().copyDefaults();
+		this.saveDefaultConfig();
+		
+		SQLConnector = new MySQLConnector(this, config.getString("MySQL.host"), config.getInt("MySQL.port"), config.getString("MySQL.user"), config.getString("MySQL.password"), config.getString("MySQL.database"));
 		
 	}
 	
