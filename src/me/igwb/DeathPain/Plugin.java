@@ -13,7 +13,7 @@ public class Plugin extends JavaPlugin{
 	private MySQLConnector SQLConnector;
 	
 	private boolean debug;
-	private boolean statistics;
+	private boolean statistics, deathMessagesOn, modifyDeathMessages;
 	private List<String> worlds;
 	
 	@Override
@@ -41,6 +41,10 @@ public class Plugin extends JavaPlugin{
 		debug = config.getBoolean("Debug");
 		statistics = config.getBoolean("Statistics");
 		worlds = config.getStringList("Worlds");
+		
+		deathMessagesOn = config.getBoolean("DeathMessages.enabled");
+		modifyDeathMessages = config.getBoolean("DeathMessages.includeDeathCount");
+		
 		
 		//Print out the configuration if(debug)
 		if(debug) {
@@ -73,6 +77,16 @@ public class Plugin extends JavaPlugin{
 	
 	public boolean getStatistics() {
 		return statistics;
+	}
+
+	public boolean getDeathMessagesOn() {
+		
+		return deathMessagesOn;
+	}
+	
+	public boolean getModifyDeathMessages() {
+		
+		return modifyDeathMessages;
 	}
 	
 	public void LogMessage(String message){

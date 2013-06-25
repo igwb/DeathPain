@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class EventListener implements Listener{
@@ -47,11 +48,23 @@ public class EventListener implements Listener{
 			if(parent.getStatistics()) {
 				parent.getSQL().logDeath(theDeadOne.getName(), cause, killer, System.currentTimeMillis(), x, y, z);
 			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerDeath(PlayerDeathEvent death) {
 		
+		if(parent.getDeathMessagesOn()) {
+			if(parent.getModifyDeathMessages()) {
+				death.setDeathMessage("[" + parent.getSQL().getDeathCount(death.getEntity().getName()) + "] " + death.getDeathMessage());
+			}
+		} else {
+			death.setDeathMessage(null);
+		}
 	}
 	
 	@EventHandler

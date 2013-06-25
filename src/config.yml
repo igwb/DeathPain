@@ -1,5 +1,8 @@
 Debug: false
 Statistics: true
+DeathMessages:
+   enabled: true
+   includeDeathCount: true
 Worlds:
  - world
 MySQL:
