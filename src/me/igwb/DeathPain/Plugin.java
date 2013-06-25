@@ -71,6 +71,10 @@ public class Plugin extends JavaPlugin{
 		return debug;
 	}
 	
+	public boolean getStatistics() {
+		return statistics;
+	}
+	
 	public void LogMessage(String message){
 		getLogger().info(message);
 	}
@@ -79,4 +83,8 @@ public class Plugin extends JavaPlugin{
 		getLogger().severe(message);
 	}
 
+	public MySQLConnector getSQL() {
+		return SQLConnector;
+	}
+	
 }

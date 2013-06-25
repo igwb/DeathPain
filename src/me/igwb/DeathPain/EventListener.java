@@ -1,8 +1,9 @@
 package me.igwb.DeathPain;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class EventListener implements Listener{
@@ -13,12 +14,43 @@ public class EventListener implements Listener{
 		this.parent = parent;
 	}
 	
+
+	
 	@EventHandler
-	public void onPlayerDeath(PlayerDeathEvent death) { 
-		if(parent.getDebug()) {
-			parent.LogMessage("Player " + death.getEntity().getDisplayName() + " died");
+	public void onEntityDeath(EntityDeathEvent death) {
+		try {
+			if(!(death.getEntity() instanceof Player)) {
+				return;
+			}
+			
+			String cause = null, killer = null;
+			int x, y, z;
+			Player theDeadOne = (Player) death.getEntity();
+
+			x = theDeadOne.getLocation().getBlockX();
+			y = theDeadOne.getLocation().getBlockY();
+			z = theDeadOne.getLocation().getBlockZ();
+			
+			
+			if(death.getEntity().getKiller() == null) {
+				cause = theDeadOne.getLastDamageCause().getCause().toString();
+			} else {
+				cause = theDeadOne.getLastDamageCause().getCause().toString();
+				killer = death.getEntity().getKiller().getName();
+			}
+			
+			if(parent.getDebug()) {
+				parent.LogMessage("Player " + theDeadOne.getName() + " died");
+				parent.LogMessage("Killed by: " + killer);
+			}
+			
+			if(parent.getStatistics()) {
+				parent.getSQL().logDeath(theDeadOne.getName(), cause, killer, System.currentTimeMillis(), x, y, z);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
 		
 	}
 	
