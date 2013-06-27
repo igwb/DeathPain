@@ -9,8 +9,10 @@ public class Plugin extends JavaPlugin{
 
 	private static final int CONFIG_VERSION = 0;
 	
-	private EventListener EL;
-	private MySQLConnector SQLConnector;
+	private EventListener el;
+	private MyCommandExecutor cx;
+	private MySQLConnector sqlConnector;
+	
 	
 	private boolean debug;
 	private boolean statistics, deathMessagesOn, modifyDeathMessages;
@@ -22,9 +24,11 @@ public class Plugin extends JavaPlugin{
 		loadConfig();
 		initializeMySQL();
 		
-		EL = new EventListener(this);
+		el = new EventListener(this);
+		cx = new MyCommandExecutor(this);
 		
-		RegisterEvents();
+		registerEvents();
+		registerCommands();
 	}
 	
 	private void loadConfig() {
@@ -34,9 +38,9 @@ public class Plugin extends JavaPlugin{
 		this.saveDefaultConfig();
 		
 		//Check if configfile versions match
-		if(config.getInt("Version") != CONFIG_VERSION)
+		if(config.getInt("Version") != CONFIG_VERSION) {
 			getLogger().warning("Your config is not up to date and needs to be regenerated!");
-		
+		}
 		
 		debug = config.getBoolean("Debug");
 		statistics = config.getBoolean("Statistics");
@@ -48,10 +52,10 @@ public class Plugin extends JavaPlugin{
 		
 		//Print out the configuration if(debug)
 		if(debug) {
-			   LogMessage("Debug mode: " + debug);
-			   LogMessage("Statistics: " + statistics);
-			   LogMessage("Enabled in world(s): " + worlds);
-			   LogMessage("Config version: " + config.getInt("Version"));
+			   logMessage("Debug mode: " + debug);
+			   logMessage("Statistics: " + statistics);
+			   logMessage("Enabled in world(s): " + worlds);
+			   logMessage("Config version: " + config.getInt("Version"));
 		}
 		
 	}
@@ -61,14 +65,19 @@ public class Plugin extends JavaPlugin{
 		config.options().copyDefaults();
 		this.saveDefaultConfig();
 		
-		SQLConnector = new MySQLConnector(this, config.getString("MySQL.host"), config.getInt("MySQL.port"), config.getString("MySQL.user"), config.getString("MySQL.password"), config.getString("MySQL.database"));
+		sqlConnector = new MySQLConnector(this, config.getString("MySQL.host"), config.getInt("MySQL.port"), config.getString("MySQL.user"), config.getString("MySQL.password"), config.getString("MySQL.database"));
 		
 	}
 	
-	private void RegisterEvents() {
+	private void registerEvents() {
 		
-		getServer().getPluginManager().registerEvents(EL,this);
+		getServer().getPluginManager().registerEvents(el,this);
 		
+	}
+	
+	private void registerCommands() {
+		
+		getCommand("death").setExecutor(cx);
 	}
 	
 	public boolean getDebug() {
@@ -89,16 +98,16 @@ public class Plugin extends JavaPlugin{
 		return modifyDeathMessages;
 	}
 	
-	public void LogMessage(String message){
+	public void logMessage(String message){
 		getLogger().info(message);
 	}
 
-	public void LogSevere(String message){
+	public void logSevere(String message){
 		getLogger().severe(message);
 	}
 
 	public MySQLConnector getSQL() {
-		return SQLConnector;
+		return sqlConnector;
 	}
 	
 }

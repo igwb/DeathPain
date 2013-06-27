@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import java.sql.PreparedStatement;
+
 public class MySQLConnector {
 
 	private Plugin parent;
@@ -50,8 +52,8 @@ public class MySQLConnector {
             
 
         } catch (SQLException e) {
-        	parent.LogSevere(MySQLConnector.class.getName());
-        	parent.LogSevere(e.getMessage());
+        	parent.logSevere(MySQLConnector.class.getName());
+        	parent.logSevere(e.getMessage());
 
         } finally {
             try {
@@ -63,8 +65,8 @@ public class MySQLConnector {
                 }
 
             } catch (SQLException e) {
-            	parent.LogMessage(MySQLConnector.class.getName());
-            	parent.LogSevere(e.getMessage());
+            	parent.logMessage(MySQLConnector.class.getName());
+            	parent.logSevere(e.getMessage());
             }
         }
 	}
@@ -80,13 +82,13 @@ public class MySQLConnector {
             rs = st.executeQuery("SELECT VERSION()");
 
             if (rs.next()) {
-            	parent.LogMessage("MySQL initialized!");
-                parent.LogMessage("MySQL version is " + rs.getString(1));
+            	parent.logMessage("MySQL initialized!");
+                parent.logMessage("MySQL version is " + rs.getString(1));
             }
 
         } catch (SQLException ex) {
-        	parent.LogSevere(MySQLConnector.class.getName());
-        	parent.LogSevere(ex.getMessage());
+        	parent.logSevere(MySQLConnector.class.getName());
+        	parent.logSevere(ex.getMessage());
 
         } finally {
             try {
@@ -101,8 +103,8 @@ public class MySQLConnector {
                 }
 
             } catch (SQLException ex) {
-            	parent.LogMessage(MySQLConnector.class.getName());
-            	parent.LogSevere(ex.getMessage());
+            	parent.logMessage(MySQLConnector.class.getName());
+            	parent.logSevere(ex.getMessage());
             }
         }
 	}
@@ -112,8 +114,8 @@ public class MySQLConnector {
 		try {
 			return DriverManager.getConnection(url, user, password);
 		} catch (SQLException e) {
-        	parent.LogSevere(MySQLConnector.class.getName());
-        	parent.LogSevere(e.getMessage());
+        	parent.logSevere(MySQLConnector.class.getName());
+        	parent.logSevere(e.getMessage());
         	return null;
 		}
 	}
@@ -121,20 +123,19 @@ public class MySQLConnector {
 	public void logDeath(String name, String cause, String killer, long timeOfDeath, int x, int y, int z) {
        
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-M-d HH:m:s");
-		parent.LogMessage(dateFormat.format(timeOfDeath));
+		parent.logMessage(dateFormat.format(timeOfDeath));
 		
 		Connection con = null;
-        Statement st = null;
         java.sql.PreparedStatement pst = null;
 		ResultSet rs = null;
 		
 		
 		 try {
 	            con = getConnection();
-	            st = con.createStatement();
 	            
 	            
-	            st.executeUpdate("USE " + database);
+	            pst = con.prepareStatement("USE " + database);
+	            pst.executeUpdate();
 	            
 	            //Check if the player already died - create entry if not
 	            pst = con.prepareStatement("SELECT * FROM players WHERE Name=?;");
@@ -158,7 +159,6 @@ public class MySQLConnector {
 	            }
 
 	            
-	            //st.executeUpdate("INSERT INTO deaths(Name, Cause, Killer, DeathTime, x, y, z) VALUES(" + name + ", " + cause + ", " + killer + ", \'" + dateFormat.format(timeOfDeath) + "\', " + x + ", " + y + ", " + z + ");");
 	            pst = con.prepareStatement("INSERT INTO deaths(Name, Cause, Killer, DeathTime, x, y, z) VALUES(?, ?, ?, ?, ?, ?, ?);");
 	            
 	            pst.setString(1, name);
@@ -172,14 +172,11 @@ public class MySQLConnector {
 	            pst.executeUpdate();
 	            
 	        } catch (SQLException e) {
-	        	parent.LogSevere(MySQLConnector.class.getName());
-	        	parent.LogSevere(e.getMessage());
+	        	parent.logSevere(MySQLConnector.class.getName());
+	        	parent.logSevere(e.getMessage());
 
 	        } finally {
 	            try {
-	                if (st != null) {
-	                    st.close();
-	                }
 	                if (pst != null) {
 	                    pst.close();
 	                }
@@ -191,8 +188,8 @@ public class MySQLConnector {
 	                }
 
 	            } catch (SQLException e) {
-	            	parent.LogMessage(MySQLConnector.class.getName());
-	            	parent.LogSevere(e.getMessage());
+	            	parent.logMessage(MySQLConnector.class.getName());
+	            	parent.logSevere(e.getMessage());
 	            }
 	        }	
 	}
@@ -208,7 +205,7 @@ public class MySQLConnector {
 	            st = con.createStatement();
 	            
 	            st.executeUpdate("USE " + database);
-	           rs = st.executeQuery("SELECT DeathCount FROM players WHERE name= \'" + player + "\';");
+	            rs = st.executeQuery("SELECT DeathCount FROM players WHERE name= \'" + player + "\';");
 	          
 	            if(rs.next()) {
 	            	return rs.getInt(1);
@@ -217,8 +214,8 @@ public class MySQLConnector {
 	            }
 
 	        } catch (SQLException e) {
-	        	parent.LogSevere(MySQLConnector.class.getName());
-	        	parent.LogSevere(e.getMessage());
+	        	parent.logSevere(MySQLConnector.class.getName());
+	        	parent.logSevere(e.getMessage());
 
 	        	return -1;
 	        } finally {
@@ -234,10 +231,62 @@ public class MySQLConnector {
 	                }
 
 	            } catch (SQLException e) {
-	            	parent.LogMessage(MySQLConnector.class.getName());
-	            	parent.LogSevere(e.getMessage());
+	            	parent.logMessage(MySQLConnector.class.getName());
+	            	parent.logSevere(e.getMessage());
 	            }
 	        }
+	}
+	
+	public String[] getDeathRanking() {
+	
+		String[] results = null;
+		Integer count, i = 0;
+		
+		Connection con = null;
+        PreparedStatement pst = null;
+		ResultSet rs = null;
+		
+		 try {
+	            con = getConnection();
+
+	            pst = con.prepareStatement("SELECT COUNT(*) FROM Players;");
+	            rs = pst.executeQuery();
+	            
+	            rs.next();
+	            count = rs.getInt(1);
+	         
+	            pst = con.prepareStatement("SELECT Name, DeathCount FROM Players ORDER BY DeathCount, Name DESC;");
+	            rs = pst.executeQuery();
+	            
+	            results = new String[count + 1];
+	            while(rs.next()) {
+	            	i ++;
+	            	results[i] = "[" + rs.getInt("DeathCount") + "] " + rs.getString("Name");
+	            }
+	            
+	        } catch (SQLException e) {
+	        	parent.logSevere(MySQLConnector.class.getName());
+	        	parent.logSevere(e.getMessage());
+	        } finally {
+	            try {
+	                if (pst != null) {
+	                    pst.close();
+	                }
+	                if(rs != null) {
+	                	rs.close();
+	                }
+	                if (con != null) {
+	                    con.close();
+	                }
+
+	            } catch (SQLException e) {
+	            	parent.logMessage(MySQLConnector.class.getName());
+	            	parent.logSevere(e.getMessage());
+	            }
+	        }
+		
+		 
+		return results;
 	}
 	
 }

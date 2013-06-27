@@ -9,14 +9,12 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class EventListener implements Listener{
 
-	Plugin parent;
-	
+    Plugin parent;
+    
 	EventListener(Plugin parent) {
 		this.parent = parent;
 	}
-	
 
-	
 	@EventHandler
 	public void onEntityDeath(EntityDeathEvent death) {
 		try {
@@ -32,7 +30,6 @@ public class EventListener implements Listener{
 			y = theDeadOne.getLocation().getBlockY();
 			z = theDeadOne.getLocation().getBlockZ();
 			
-			
 			if(death.getEntity().getKiller() == null) {
 				cause = theDeadOne.getLastDamageCause().getCause().toString();
 			} else {
@@ -41,8 +38,8 @@ public class EventListener implements Listener{
 			}
 			
 			if(parent.getDebug()) {
-				parent.LogMessage("Player " + theDeadOne.getName() + " died");
-				parent.LogMessage("Killed by: " + killer);
+				parent.logMessage("Player " + theDeadOne.getName() + " died");
+				parent.logMessage("Killed by: " + killer);
 			}
 			
 			if(parent.getStatistics()) {
@@ -70,7 +67,7 @@ public class EventListener implements Listener{
 	@EventHandler
 	void onPlayerRespawn(PlayerRespawnEvent respawn) { 
 		if(parent.getDebug()) {
-			parent.LogMessage("Player " + respawn.getPlayer().getDisplayName() + " respawned");
+			parent.logMessage("Player " + respawn.getPlayer().getDisplayName() + " respawned");
 		}
 		
 	}
