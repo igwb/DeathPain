@@ -42,10 +42,16 @@ public class EventListener implements Listener{
                 parent.logMessage("Killed by: " + killer);
             }
 
-            if(parent.getStatistics()) {
-                parent.getSQL().logDeath(theDeadOne.getName(), cause, killer, System.currentTimeMillis(), x, y, z);
-            }
+            parent.getSQL().logDeath(theDeadOne.getName(), cause, killer, System.currentTimeMillis(), x, y, z);
 
+            
+            //Change the serverity level of the player
+            if(death.getEntity().getKiller() == null) {
+                parent.getSeverityManager().playerDied(theDeadOne.getName());
+            } else {
+                parent.getSeverityManager().playerKilled(death.getEntity().getKiller().getName(), theDeadOne.getName());
+            }
+            
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -57,7 +63,7 @@ public class EventListener implements Listener{
 
         if(parent.getDeathMessagesOn()) {
             if(parent.getModifyDeathMessages()) {
-                death.setDeathMessage("[" + parent.getSQL().getDeathCount(death.getEntity().getName()) + "] " + death.getDeathMessage());
+                death.setDeathMessage("[" + (parent.getSQL().getDeathCount(death.getEntity().getName()) + 1) + "] " + death.getDeathMessage());
             }
         } else {
             death.setDeathMessage(null);

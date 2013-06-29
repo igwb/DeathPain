@@ -12,10 +12,10 @@ public class Plugin extends JavaPlugin{
     private EventListener el;
     private MyCommandExecutor cx;
     private MySQLConnector sqlConnector;
-
+    private SeverityManager sm;
 
     private boolean debug;
-    private boolean statistics, deathMessagesOn, modifyDeathMessages;
+    private boolean deathMessagesOn, modifyDeathMessages;
     private List<String> worlds;
 
     @Override
@@ -26,7 +26,7 @@ public class Plugin extends JavaPlugin{
 
         el = new EventListener(this);
         cx = new MyCommandExecutor(this);
-
+        
         registerEvents();
         registerCommands();
     }
@@ -43,17 +43,19 @@ public class Plugin extends JavaPlugin{
         }
 
         debug = config.getBoolean("Debug");
-        statistics = config.getBoolean("Statistics");
         worlds = config.getStringList("Worlds");
 
         deathMessagesOn = config.getBoolean("DeathMessages.enabled");
         modifyDeathMessages = config.getBoolean("DeathMessages.includeDeathCount");
 
-
+        //Severity settings:
+        
+        sm = new SeverityManager(this, Integer.parseInt(config.getString("Punishments.death")), Integer.parseInt(config.getString("Punishments.interval")), Integer.parseInt(config.getString("Punishments.normalKill")), Integer.parseInt(config.getString("Punishments.revengeKill")), config.getBoolean("Punishments.intervalWhileOffline"), config.getInt("Punishments.interval"));
+        
+        
         //Print out the configuration if(debug)
         if(debug) {
             logMessage("Debug mode: " + debug);
-            logMessage("Statistics: " + statistics);
             logMessage("Enabled in world(s): " + worlds);
             logMessage("Config version: " + config.getInt("Version"));
         }
@@ -84,10 +86,6 @@ public class Plugin extends JavaPlugin{
         return debug;
     }
 
-    public boolean getStatistics() {
-        return statistics;
-    }
-
     public boolean getDeathMessagesOn() {
 
         return deathMessagesOn;
@@ -108,6 +106,11 @@ public class Plugin extends JavaPlugin{
 
     public MySQLConnector getSQL() {
         return sqlConnector;
+    }
+    
+    public SeverityManager getSeverityManager() {
+       
+        return sm;
     }
 
 }

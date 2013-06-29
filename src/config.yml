@@ -1,8 +1,14 @@
-Debug: false
-Statistics: true
 DeathMessages:
    enabled: true
    includeDeathCount: true
+Punishments:
+   enable: true
+   interval: 30
+   perInterval: -1
+   intervalWhileOffline: false
+   death: 2
+   revengeKill: -2
+   normalKill: -1
 Worlds:
  - world
 MySQL:
@@ -13,3 +19,4 @@ MySQL:
    password: password
    database: deathpain
 Version: 0
+Debug: false
