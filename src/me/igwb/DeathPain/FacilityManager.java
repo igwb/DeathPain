@@ -21,8 +21,12 @@ public class FacilityManager {
     public FacilityManager(Plugin parent) {
         
         this.parent = parent;
-        FACILITY_FOLDER = parent.getDataFolder() + "\\Facilities";
+        FACILITY_FOLDER = parent.getDataFolder() + "/Facilities";
       
+        if(parent.getDebug()) {
+            parent.logMessage(FACILITY_FOLDER);
+        }
+        
         if(!new File(FACILITY_FOLDER).exists()) {
             new File(FACILITY_FOLDER).mkdir();
             parent.logMessage("Creating facilities storrage directory.");
@@ -50,9 +54,10 @@ public class FacilityManager {
                     props = new Properties();
                     props.load(reader);
 
-                    start = new Location(parent.getServer().getWorld(props.getProperty("world")), Integer.parseInt(props.getProperty("startX")), Integer.parseInt(props.getProperty("startY")), Integer.parseInt(props.getProperty("startZ")));
-                    end = new Location(parent.getServer().getWorld(props.getProperty("world")), Integer.parseInt(props.getProperty("endX")), Integer.parseInt(props.getProperty("endY")), Integer.parseInt(props.getProperty("endZ")));
+                    start = new Location(parent.getServer().getWorld(props.getProperty("world")), Double.parseDouble(props.getProperty("startX")), Double.parseDouble(props.getProperty("startY")), Double.parseDouble(props.getProperty("startZ")), Float.parseFloat(props.getProperty("sYaw")), Float.parseFloat(props.getProperty("sPitch")));
+                    end = new Location(parent.getServer().getWorld(props.getProperty("world")), Double.parseDouble(props.getProperty("endX")), Double.parseDouble(props.getProperty("endY")), Double.parseDouble(props.getProperty("endZ")));
                     
+                    //TODO: Add check if facility is still valid (end sign exists?)
                     facilityList.add(new Facility(props.getProperty("Name"), Integer.parseInt(props.getProperty("TimeLimit")), Integer.parseInt(props.getProperty("minSeverity")), Integer.parseInt(props.getProperty("maxSeverity")), start, end));
                 }
             } else {
@@ -100,7 +105,9 @@ public class FacilityManager {
             props.setProperty("startX", sX.toString());
             props.setProperty("startY", sY.toString());
             props.setProperty("startZ", sZ.toString());
-
+            props.setProperty("sYaw", Float.toString(saveFacility.getStartPoint().getYaw()));
+            props.setProperty("sPitch", Float.toString(saveFacility.getStartPoint().getPitch()));
+            
             eX = saveFacility.getEndSignLocation().getBlockX();
             eY = saveFacility.getEndSignLocation().getBlockY();
             eZ = saveFacility.getEndSignLocation().getBlockZ();
@@ -108,8 +115,7 @@ public class FacilityManager {
             props.setProperty("endY", eY.toString());
             props.setProperty("endZ", eZ.toString());
 
-
-            inFileProps = new File(FACILITY_FOLDER + "\\" + saveFacility.getName() + ".properties");
+            inFileProps = new File(FACILITY_FOLDER + "/" + saveFacility.getName() + ".properties");
            //Create file if not exists
             if(!inFileProps.exists()) {
                 inFileProps.createNewFile();
@@ -178,7 +184,7 @@ public class FacilityManager {
 
         for (Facility fac : facilityList) {
             if(fac.getName().equalsIgnoreCase(name)) {
-                facilityFile = new File(FACILITY_FOLDER + "\\" + fac.getName() + ".properties");
+                facilityFile = new File(FACILITY_FOLDER + "/" + fac.getName() + ".properties");
                 if(facilityFile.exists()) {
                     success = facilityFile.delete();
                 }

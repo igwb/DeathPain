@@ -44,6 +44,12 @@ public class MyCommandExecutor implements CommandExecutor {
         case "deletefacility":
             cmdDeleteFacility(sender, arg3);
             return true;
+        case "changeseverity":
+            cmdChangeSeverity(sender, arg3);
+            return true;
+        case "setspawn":
+            cmdSetSpawn(sender, arg3);
+            return true;
         default:
             sender.sendMessage("Command not supported!");
             break;
@@ -143,5 +149,44 @@ public class MyCommandExecutor implements CommandExecutor {
        } else {
            sender.sendMessage("Facility " + args[1] + " could not be delted... Does it exist?");
        }
+    }
+
+    private void cmdChangeSeverity(CommandSender sender, String[] args) {
+        
+        //Input validation
+        if(args.length > 3) {
+            sender.sendMessage("Too many arguments.");
+            sender.sendMessage("Usage: /death changeSeverity [player] [new Severity]");
+        }
+        
+        if(args.length < 3) {
+            sender.sendMessage("Not enough arguments.");
+            sender.sendMessage("Usage: /death changeSeverity [player] [new Severity]");
+        }
+        
+        parent.logMessage(args[1]);
+        parent.logMessage(args[2]);
+        
+        try {
+            parent.getSQL().setSeverity(args[1], Integer.parseInt(args[2]));
+            sender.sendMessage("Successfully set death severity value for player \"" + args[1] +"\" to " + args[2] + ".");
+        } catch (NumberFormatException e) {
+            sender.sendMessage("Severity needs to be a number!");
+            sender.sendMessage("Usage: /death changeSeverity [player] [new Severity]");
+        }
+    }
+
+    private void cmdSetSpawn(CommandSender sender, String[] args) {
+        
+        
+        if(!(sender instanceof Player)) {
+            sender.sendMessage("This command must be executed by a player!");
+            return;
+        }
+        
+        Player p = (Player)sender;
+        parent.setRespawnPoint(p.getLocation());
+        
+        sender.sendMessage("Succeessfully set your postion as death respawn point.");
     }
 }

@@ -1,4 +1,6 @@
 package me.igwb.DeathPain;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -58,7 +60,7 @@ public class Plugin extends JavaPlugin{
         List<String> respawnInfos;
         handleRespawns = config.getBoolean("Respawning.handleRespawns");
         respawnInfos = config.getStringList("Respawning.respawnPoint");
-        respawnPoint = new Location(this.getServer().getWorld(respawnInfos.get(0)), Integer.parseInt(respawnInfos.get(1)), Integer.parseInt(respawnInfos.get(2)), Integer.parseInt(respawnInfos.get(3)));
+        respawnPoint = new Location(this.getServer().getWorld(respawnInfos.get(0)), Double.parseDouble(respawnInfos.get(1)), Double.parseDouble(respawnInfos.get(2)), Double.parseDouble(respawnInfos.get(3)), Float.parseFloat(respawnInfos.get(4)), Float.parseFloat(respawnInfos.get(5)));
         
         //Severity settings:
         sm = new SeverityManager(this, Integer.parseInt(config.getString("Punishments.death")), Integer.parseInt(config.getString("Punishments.interval")), Integer.parseInt(config.getString("Punishments.normalKill")), Integer.parseInt(config.getString("Punishments.revengeKill")), config.getBoolean("Punishments.intervalWhileOffline"), config.getInt("Punishments.interval"));
@@ -128,8 +130,32 @@ public class Plugin extends JavaPlugin{
    
         return respawnPoint;
     }
-    
 
+    public void setRespawnPoint(Location newSpawn) {
+        
+        FileConfiguration config = this.getConfig();
+        config.options().copyDefaults();
+        this.saveDefaultConfig();
+        
+        List<String> respawnInfos = new ArrayList<String>();
+        
+        respawnInfos.add(newSpawn.getWorld().getName());
+        respawnInfos.add(Long.toString((long) newSpawn.getX()));
+        respawnInfos.add(Long.toString((long) newSpawn.getY()));
+        respawnInfos.add(Long.toString((long) newSpawn.getZ()));
+        respawnInfos.add(Float.toString(newSpawn.getYaw()));
+        respawnInfos.add(Float.toString(newSpawn.getPitch()));
+        
+        config.set("Respawning.respawnPoint", respawnInfos);
+        try {
+            config.save(getDataFolder() + "/config.yml");
+            respawnPoint = newSpawn;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
     public boolean isHandelingRespawns() {
         
         return handleRespawns;

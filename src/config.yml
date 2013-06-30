@@ -4,10 +4,12 @@ DeathMessages:
 Respawning:
    handleRespawns: true
    respawnPoint:
-       - world:
-       - x:
-       - y:
-       - z:
+     - world
+     - '0'
+     - '100'
+     - '0'
+     - '0'
+     - '0'
 Punishments:
    enable: true
    interval: 30

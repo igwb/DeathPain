@@ -1,5 +1,8 @@
 package me.igwb.DeathPain;
 
+import java.util.ArrayList;
+
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +30,7 @@ public class EventListener implements Listener{
             }
 
             //Check if the plugin is enabled in the world the death occured
-            if(!parent.getActiveWorlds().contains(death.getEntity().getLocation().getWorld())) {
+            if(!parent.getActiveWorlds().contains(death.getEntity().getLocation().getWorld().getName())) {
                 return;
             }
             
@@ -98,7 +101,7 @@ public class EventListener implements Listener{
         respawnFacility = parent.getFacilityManager().findAppropriateFacility(severity);
         
         //Check if facility was found and if player has ignore permission
-        if(respawnFacility != null && !respawn.getPlayer().hasPermission("deathpian.ignoreRespawn")) {
+        if(respawnFacility != null) {
             
             if(parent.getDebug()) {
                 parent.logMessage("Respawning player at facility");
@@ -122,6 +125,19 @@ public class EventListener implements Listener{
             return;
         }
         
+        //Check if an end sign was clicked
+        if(interact.getClickedBlock().getState() instanceof Sign) {
+            ArrayList<Facility> facilitys;
+            
+            facilitys = parent.getFacilityManager().getAllFacilities();
+            
+            for (Facility fac : facilitys) {
+                if(interact.getClickedBlock().getLocation().equals(fac.getEndSignLocation())) {
+                    interact.getPlayer().teleport(parent.getRespawnPoint());
+                }
+            }
+        }
+        
         //Check if a facility is being created and if the player is the one creating - otherwise return
         if(!parent.getFacilityCreator().getIsActive() || parent.getFacilityCreator().getPlayerActive() != interact.getPlayer().getName()) {
             return;
@@ -137,7 +153,7 @@ public class EventListener implements Listener{
                 parent.getFacilityCreator().setFacilityMaxSeverity(theSign.getLine(2));
                 parent.getFacilityCreator().setFacilityTimeLimit(theSign.getLine(3));
 
-                parent.getFacilityCreator().setFacilityStart(theSign.getLocation());
+                parent.getFacilityCreator().setFacilityStart(new Location(theSign.getLocation().getWorld(), theSign.getLocation().getX(), theSign.getLocation().getY(), theSign.getLocation().getZ(), interact.getPlayer().getLocation().getYaw(), interact.getPlayer().getLocation().getPitch()));
 
                 interact.getPlayer().sendMessage("Start point registered successfully.");
                 interact.getPlayer().sendMessage("Place a sign at the exit and hit it to complete. - Hit any other block to cancel.");
@@ -149,6 +165,10 @@ public class EventListener implements Listener{
                 parent.getFacilityCreator().setFacilityEnd(theSign.getLocation());
                 if(parent.getFacilityCreator().completeCreation()) {
                     interact.getPlayer().sendMessage("Creation was successful!");
+                    theSign.setLine(0, "=======");
+                    theSign.setLine(1, "Click to");
+                    theSign.setLine(2, "exit");
+                    theSign.setLine(3, "=====");
                 } else {
                     interact.getPlayer().sendMessage("Sorry, creation failed!");
                 }
