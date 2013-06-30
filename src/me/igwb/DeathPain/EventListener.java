@@ -20,10 +20,17 @@ public class EventListener implements Listener{
     @EventHandler
     public void onEntityDeath(EntityDeathEvent death) {
         try {
+           
+            //Check if the dead entity was a player.
             if(!(death.getEntity() instanceof Player)) {
                 return;
             }
 
+            //Check if the plugin is enabled in the world the death occured
+            if(!parent.getActiveWorlds().contains(death.getEntity().getLocation().getWorld())) {
+                return;
+            }
+            
             String cause = null, killer = null;
             int x, y, z;
             Player theDeadOne = (Player) death.getEntity();
@@ -62,7 +69,7 @@ public class EventListener implements Listener{
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent death) {
-
+        
         if(parent.getDeathMessagesOn()) {
             if(parent.getModifyDeathMessages()) {
                 death.setDeathMessage("[" + (parent.getSQL().getDeathCount(death.getEntity().getName()) + 1) + "] " + death.getDeathMessage());
@@ -78,8 +85,11 @@ public class EventListener implements Listener{
             parent.logMessage("Player " + respawn.getPlayer().getDisplayName() + " respawned");
         }
 
-        
-        //TODO: Check for ignore permission
+        //Check if the plugin is active in the world the players re-spawns
+        //TODO: This may lead to unwanted behavior when the player dies in a disabled and re-spawns in an active world.
+        if(!parent.getActiveWorlds().contains(respawn.getPlayer().getLocation().getWorld())) {
+            return;
+        }
         
         //Find a location for the user to re-spawn
         Integer severity;
@@ -87,16 +97,15 @@ public class EventListener implements Listener{
         severity = parent.getSQL().getSeverity(respawn.getPlayer().getName());
         respawnFacility = parent.getFacilityManager().findAppropriateFacility(severity);
         
-        //Check if facility was found
-        if(respawnFacility != null) {
+        //Check if facility was found and if player has ignore permission
+        if(respawnFacility != null && !respawn.getPlayer().hasPermission("deathpian.ignoreRespawn")) {
             
-            respawn.setRespawnLocation(respawnFacility.getEndSignLocation());
+            respawn.setRespawnLocation(respawnFacility.getStartPoint());
         } else {
-            parent.logSevere("Could not handle respawn for player \"" + respawn.getPlayer().getName() + "\"! No facility could be found. Severity: " + severity);
-            parent.logSevere(this.getClass().getName());
+            
+            //Respawn player at default spawn if no facility could be found for him.
+            respawn.setRespawnLocation(parent.getRespawnPoint());
         }
-        
-        
     }
 
     @EventHandler

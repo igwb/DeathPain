@@ -1,6 +1,7 @@
 package me.igwb.DeathPain;
 import java.util.List;
 
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,8 +18,9 @@ public class Plugin extends JavaPlugin{
     private FacilityCreator fc;
 
     private boolean debug;
-    private boolean deathMessagesOn, modifyDeathMessages;
+    private boolean deathMessagesOn, modifyDeathMessages, handleRespawns;
     private List<String> worlds;
+    Location respawnPoint;
     
     @Override
     public void onEnable()  {
@@ -52,15 +54,20 @@ public class Plugin extends JavaPlugin{
         deathMessagesOn = config.getBoolean("DeathMessages.enabled");
         modifyDeathMessages = config.getBoolean("DeathMessages.includeDeathCount");
 
+        //Re-spawning
+        List<String> respawnInfos;
+        handleRespawns = config.getBoolean("Respawning.handleRespawns");
+        respawnInfos = config.getStringList("Respawning.respawnPoint");
+        respawnPoint = new Location(this.getServer().getWorld(respawnInfos.get(0)), Integer.parseInt(respawnInfos.get(1)), Integer.parseInt(respawnInfos.get(2)), Integer.parseInt(respawnInfos.get(3)));
+        
         //Severity settings:
-        
         sm = new SeverityManager(this, Integer.parseInt(config.getString("Punishments.death")), Integer.parseInt(config.getString("Punishments.interval")), Integer.parseInt(config.getString("Punishments.normalKill")), Integer.parseInt(config.getString("Punishments.revengeKill")), config.getBoolean("Punishments.intervalWhileOffline"), config.getInt("Punishments.interval"));
-        
         
         //Print out the configuration if(debug)
         if(debug) {
             logMessage("Debug mode: " + debug);
             logMessage("Enabled in world(s): " + worlds);
+            logMessage("Respawning at: " + respawnPoint.toString());
             logMessage("Config version: " + config.getInt("Version"));
         }
 
@@ -112,6 +119,22 @@ public class Plugin extends JavaPlugin{
         return sqlConnector;
     }
     
+    public List<String> getActiveWorlds() {
+
+        return worlds;
+    }
+
+    public Location getRespawnPoint() {
+   
+        return respawnPoint;
+    }
+    
+
+    public boolean isHandelingRespawns() {
+        
+        return handleRespawns;
+    }
+
     public SeverityManager getSeverityManager() {
        
         return sm;

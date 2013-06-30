@@ -1,6 +1,13 @@
 DeathMessages:
    enabled: true
    includeDeathCount: true
+Respawning:
+   handleRespawns: true
+   respawnPoint:
+       - world:
+       - x:
+       - y:
+       - z:
 Punishments:
    enable: true
    interval: 30
@@ -10,7 +17,7 @@ Punishments:
    revengeKill: -2
    normalKill: -1
 Worlds:
- - world
+   - world
 MySQL:
    enable: true
    host: localhost
