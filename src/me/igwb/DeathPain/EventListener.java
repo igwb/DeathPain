@@ -5,7 +5,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.block.Sign;
 
 public class EventListener implements Listener{
 
@@ -76,5 +78,70 @@ public class EventListener implements Listener{
             parent.logMessage("Player " + respawn.getPlayer().getDisplayName() + " respawned");
         }
 
+        
+        //TODO: Check for ignore permission
+        
+        //Find a location for the user to re-spawn
+        Integer severity;
+        Facility respawnFacility;
+        severity = parent.getSQL().getSeverity(respawn.getPlayer().getName());
+        respawnFacility = parent.getFacilityManager().findAppropriateFacility(severity);
+        
+        //Check if facility was found
+        if(respawnFacility != null) {
+            
+            respawn.setRespawnLocation(respawnFacility.getEndSignLocation());
+        } else {
+            parent.logSevere("Could not handle respawn for player \"" + respawn.getPlayer().getName() + "\"! No facility could be found. Severity: " + severity);
+            parent.logSevere(this.getClass().getName());
+        }
+        
+        
+    }
+
+    @EventHandler
+    void onPlayerInteractEvent(PlayerInteractEvent interact) {
+        
+        //Check if block is present
+        if(interact.getClickedBlock() == null) {
+            return;
+        }
+        
+        //Check if a facility is being created and if the player is the one creating - otherwise return
+        if(!parent.getFacilityCreator().getIsActive() || parent.getFacilityCreator().getPlayerActive() != interact.getPlayer().getName()) {
+            return;
+        }
+
+
+        if(interact.getClickedBlock().getState() instanceof Sign) {
+            Sign theSign = (Sign)(interact.getClickedBlock().getState());
+
+            if(!parent.getFacilityCreator().isWaitingForExitSign()) {
+                parent.getFacilityCreator().setFacilityName(theSign.getLine(0));
+                parent.getFacilityCreator().setFacilityMinSeverity(theSign.getLine(1));
+                parent.getFacilityCreator().setFacilityMaxSeverity(theSign.getLine(2));
+                parent.getFacilityCreator().setFacilityTimeLimit(theSign.getLine(3));
+
+                parent.getFacilityCreator().setFacilityStart(theSign.getLocation());
+
+                interact.getPlayer().sendMessage("Start point registered successfully.");
+                interact.getPlayer().sendMessage("Place a sign at the exit and hit it to complete. - Hit any other block to cancel.");
+
+
+                parent.getFacilityCreator().setWaitingForExitSign(true);
+            } else {
+
+                parent.getFacilityCreator().setFacilityEnd(theSign.getLocation());
+                if(parent.getFacilityCreator().completeCreation()) {
+                    interact.getPlayer().sendMessage("Creation was successful!");
+                } else {
+                    interact.getPlayer().sendMessage("Sorry, creation failed!");
+                }
+            }
+        } else {
+
+            parent.getFacilityCreator().setActive(false);
+            interact.getPlayer().sendMessage("Facility creation aborted!");
+        }
     }
 }

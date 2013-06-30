@@ -48,7 +48,7 @@ public class MySQLConnector {
             st.executeUpdate("USE " + database);
             st.executeUpdate("CREATE TABLE IF NOT EXISTS Players(Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(30), DeathCount INT, DeathSeverity INT, LastDeath TIMESTAMP);");
             st.executeUpdate("CREATE TABLE IF NOT EXISTS Deaths(Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(30), Cause VARCHAR(25), Killer VARCHAR(25), DeathTime TIMESTAMP, x INT, y INT, z INT);");
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS Punishments(Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(30), TimeLimit INT, WGRegion VARCHAR(30), Severity INT, StartX INT, StartY INT, StartZ INT, SignX INT, SignY INT, SignZ INT);");
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS Facilities(Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(30), TimeLimit INT, WGRegion VARCHAR(30), MaxSeverity INT, MinSeverity INT, StartX INT, StartY INT, StartZ INT, SignX INT, SignY INT, SignZ INT);");
 
 
         } catch (SQLException e) {
@@ -138,12 +138,12 @@ public class MySQLConnector {
             pst.executeUpdate();
 
             //Check if the player already died - create entry if not
-            pst = con.prepareStatement("SELECT * FROM players WHERE Name=?;");
+            pst = con.prepareStatement("SELECT * FROM Players WHERE Name=?;");
             pst.setString(1, name);
             rs = pst.executeQuery();
 
             if(!rs.next()) {
-                pst = con.prepareStatement("INSERT INTO players(Name, DeathCount, DeathSeverity, LastDeath) Values(?, ?, ?, ?);");
+                pst = con.prepareStatement("INSERT INTO Players(Name, DeathCount, DeathSeverity, LastDeath) Values(?, ?, ?, ?);");
                 pst.setString(1, name);
                 pst.setInt(2, 1);
                 pst.setInt(3, 0);
@@ -152,7 +152,7 @@ public class MySQLConnector {
                 pst.executeUpdate();
 
             } else {
-                pst = con.prepareStatement("UPDATE players SET DeathCount = ? WHERE name = ?;");
+                pst = con.prepareStatement("UPDATE Players SET DeathCount = ? WHERE name = ?;");
                 pst.setInt(1, getDeathCount(name) + 1);
                 pst.setString(2, name);
 
@@ -160,7 +160,7 @@ public class MySQLConnector {
             }
 
 
-            pst = con.prepareStatement("INSERT INTO deaths(Name, Cause, Killer, DeathTime, x, y, z) VALUES(?, ?, ?, ?, ?, ?, ?);");
+            pst = con.prepareStatement("INSERT INTO Deaths(Name, Cause, Killer, DeathTime, x, y, z) VALUES(?, ?, ?, ?, ?, ?, ?);");
 
             pst.setString(1, name);
             pst.setString(2, cause);
@@ -206,7 +206,7 @@ public class MySQLConnector {
             st = con.createStatement();
 
             st.executeUpdate("USE " + database);
-            rs = st.executeQuery("SELECT DeathCount FROM players WHERE name= \'" + player + "\';");
+            rs = st.executeQuery("SELECT DeathCount FROM Players WHERE name= \'" + player + "\';");
 
             if(rs.next()) {
                 return rs.getInt(1);
@@ -343,7 +343,7 @@ public class MySQLConnector {
         try {
             con = getConnection();
 
-            pst = con.prepareStatement("UPDATE players SET DeathSeverity = ? WHERE Name = ?;");
+            pst = con.prepareStatement("UPDATE Players SET DeathSeverity = ? WHERE Name = ?;");
             pst.setInt(1, newSeverity);
             pst.setString(2, player);
             pst.executeUpdate();
@@ -367,5 +367,7 @@ public class MySQLConnector {
             }
         }
     }
+    
+   
     
 }

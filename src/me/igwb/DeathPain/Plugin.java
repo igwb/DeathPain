@@ -13,11 +13,13 @@ public class Plugin extends JavaPlugin{
     private MyCommandExecutor cx;
     private MySQLConnector sqlConnector;
     private SeverityManager sm;
+    private FacilityManager fm;
+    private FacilityCreator fc;
 
     private boolean debug;
     private boolean deathMessagesOn, modifyDeathMessages;
     private List<String> worlds;
-
+    
     @Override
     public void onEnable()  {
 
@@ -26,6 +28,8 @@ public class Plugin extends JavaPlugin{
 
         el = new EventListener(this);
         cx = new MyCommandExecutor(this);
+        fm = new FacilityManager(this);
+        fc = new FacilityCreator(this);
         
         registerEvents();
         registerCommands();
@@ -37,7 +41,7 @@ public class Plugin extends JavaPlugin{
         config.options().copyDefaults();
         this.saveDefaultConfig();
 
-        //Check if configfile versions match
+        //Check if configuration file versions match
         if(config.getInt("Version") != CONFIG_VERSION) {
             getLogger().warning("Your config is not up to date and needs to be regenerated!");
         }
@@ -113,4 +117,14 @@ public class Plugin extends JavaPlugin{
         return sm;
     }
 
+    public FacilityManager getFacilityManager() {
+        
+        return fm;
+    }
+    
+    public FacilityCreator getFacilityCreator() {
+        
+        return fc;
+    }
+    
 }
