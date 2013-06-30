@@ -170,5 +170,22 @@ public class FacilityManager {
         
         return null;
     }
-    
+
+    public boolean deleteFacility(String name) {
+
+        File facilityFile;
+        boolean success = false;
+
+        for (Facility fac : facilityList) {
+            if(fac.getName().equalsIgnoreCase(name)) {
+                facilityFile = new File(FACILITY_FOLDER + "\\" + fac.getName() + ".properties");
+                if(facilityFile.exists()) {
+                    success = facilityFile.delete();
+                }
+            }
+        }
+        
+        loadFacilities();
+        return success;
+    }
 }

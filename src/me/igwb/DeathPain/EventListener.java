@@ -87,7 +87,7 @@ public class EventListener implements Listener{
 
         //Check if the plugin is active in the world the players re-spawns
         //TODO: This may lead to unwanted behavior when the player dies in a disabled and re-spawns in an active world.
-        if(!parent.getActiveWorlds().contains(respawn.getPlayer().getLocation().getWorld())) {
+        if(!parent.getActiveWorlds().contains(respawn.getPlayer().getLocation().getWorld().getName())) {
             return;
         }
         
@@ -100,10 +100,16 @@ public class EventListener implements Listener{
         //Check if facility was found and if player has ignore permission
         if(respawnFacility != null && !respawn.getPlayer().hasPermission("deathpian.ignoreRespawn")) {
             
+            if(parent.getDebug()) {
+                parent.logMessage("Respawning player at facility");
+            }
             respawn.setRespawnLocation(respawnFacility.getStartPoint());
         } else {
             
             //Respawn player at default spawn if no facility could be found for him.
+            if(parent.getDebug()) {
+                parent.logMessage("Respawning player at spawn");
+            }
             respawn.setRespawnLocation(parent.getRespawnPoint());
         }
     }
